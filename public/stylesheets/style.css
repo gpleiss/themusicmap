@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+}
+
+g.artist circle {
+  fill: #48F;
+  stroke: #333;
+  stroke-width: 2px;
+}
+
+line.link {
+  stroke-width: 1px;
+  stroke: #777;
+}
+
