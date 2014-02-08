@@ -2,6 +2,7 @@ var mongoose = require('mongoose')
   , echojs = require('echojs')
   , async = require('async')
   , config = require('./config/config')[process.env.ENV]
+  , mapConfig = require('./config/map').mapConfig
   , Artist = require('./models/artist').Artist;
 
 var echo = echojs({key: process.env.ECHONEST_KEY});
@@ -54,7 +55,7 @@ task('seed', function () {
       echo('artist/search').get({
         bucket: 'familiarity',
         sort: 'familiarity-desc',
-        results: 10
+        results: mapConfig.numSeedArtists
       }, function (err, json) {
         if (err) { fail(err); }
         async.eachSeries(json.response.artists, _findOrCreateArtist, complete);
@@ -75,10 +76,10 @@ task('expand', ['seed'], function () {
 
       echo('artist/similar').get({
         id: artist.echonestId,
-        max_familiarity: artist.familiarity,
-        min_familiarity: artist.familiarity * 0.7,
+        max_familiarity: artist.familiarity * mapConfig.similarArtistAttrs.maxFamiliarityPerc,
+        min_familiarity: artist.familiarity * mapConfig.similarArtistAttrs.minFamiliarityPerc,
         bucket: 'familiarity',
-        results: 5,
+        results: mapConfig.similarArtistAttrs.numSimilarArtists,
       },
       function (err, json) {
         if (err && err == 429) {
