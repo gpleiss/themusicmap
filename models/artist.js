@@ -8,7 +8,6 @@ var artistSchema = new Schema({
   familiarity: Number,
   similar: [Artist],
   createdAt: { type: Date, default: Date.now },
-  processed: { type: Boolean, default: false }
 });
 
 var Artist = mongoose.model('Artist', artistSchema);

@@ -38,6 +38,39 @@ var _findOrCreateArtist = function(artistData, callback) {
   });
 };
 
+var _findSimilarArtists = function(artist, callback) {
+  echo('artist/similar').get({
+    id: artist.echonestId,
+    max_familiarity: artist.familiarity * mapConfig.similarArtistAttrs.maxFamiliarityPerc,
+    min_familiarity: artist.familiarity * mapConfig.similarArtistAttrs.minFamiliarityPerc,
+    bucket: 'familiarity',
+    results: mapConfig.similarArtistAttrs.numSimilarArtists,
+  },
+  function (err, json) {
+    if (err && err == 429) {
+      jake.logger.log("Rate limit hit. Trying again in 20 seconds...");
+      setTimeout(function() {
+        _findSimilarArtists(artist, callback);
+      }, 20000);
+    }
+    else if (err) {
+      fail(err);
+    }
+    else {
+      async.map(json.response.artists, _findOrCreateArtist, function(err, similarArtists) {
+        if (similarArtists[0] && similarArtists[0] != undefined) {
+          artist.similar = similarArtists;
+        }
+        artist.save(function(err) {
+          if (err) { throw new Error(err); }
+          jake.logger.log(artist);
+          callback();
+        });
+      });
+    }
+  });
+}
+
 task('drop', function () {
   Artist.remove({}, function(err) {
     if (err) { throw new Error(err); }
@@ -58,7 +91,13 @@ task('seed', function () {
         results: mapConfig.numSeedArtists
       }, function (err, json) {
         if (err) { fail(err); }
-        async.eachSeries(json.response.artists, _findOrCreateArtist, complete);
+        async.mapSeries(json.response.artists, _findOrCreateArtist, function(err, artists) {
+          if (err) { fail(err); }
+          async.eachSeries(artists, _findSimilarArtists, function(err) {
+            if (err) { fail(err); }
+            complete();
+          });
+        });
       });
     }
 
@@ -66,45 +105,5 @@ task('seed', function () {
       jake.logger.log("Database already seeded");
       complete();
     }
-  });
-}, {async: true});
-
-task('expand', ['seed'], function () {
-  async.forever(function (callback) {
-    Artist.findOne({$query: {processed: false}, $orderby: {'familiarity': -1}}, function (err, artist) {
-      if (err) { fail(err); }
-
-      echo('artist/similar').get({
-        id: artist.echonestId,
-        max_familiarity: artist.familiarity * mapConfig.similarArtistAttrs.maxFamiliarityPerc,
-        min_familiarity: artist.familiarity * mapConfig.similarArtistAttrs.minFamiliarityPerc,
-        bucket: 'familiarity',
-        results: mapConfig.similarArtistAttrs.numSimilarArtists,
-      },
-      function (err, json) {
-        if (err && err == 429) {
-          fail("Rate limit hit.");
-        }
-        else if (err) {
-          fail(err);
-        }
-        else {
-          async.map(json.response.artists, _findOrCreateArtist, function(err, similarArtists) {
-            artist.processed = true;
-            if (similarArtists[0] && similarArtists[0] != undefined) {
-              artist.similar = similarArtists;
-            }
-            artist.save(function(err) {
-              jake.logger.log(artist);
-              if (err) { throw new Error(err); }
-              callback();
-            });
-          });
-        }
-      });
-    });
-  }, function (err) {
-    if (err) { fail(err); }
-    complete();
   });
 }, {async: true});
