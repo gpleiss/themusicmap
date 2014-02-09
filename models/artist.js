@@ -12,12 +12,14 @@ var artistSchema = new Schema({
 
 var Artist = mongoose.model('Artist', artistSchema);
 
-Artist.schema.path('echonestId').validate(function (value, respond) {
+var _uniquenessOfEchonestId = function (value, respond) {
   var self = this;
   Artist.findOne({ echonestId: value }, function (err, artist) {
     if (err) { console.error(err); }
     respond(!(artist && artist.id != self.id));
   });
-}, 'Artist already is stored in database');
+}
+
+Artist.schema.path('echonestId').validate(_uniquenessOfEchonestId, 'Artist already is stored in database');
 
 exports.Artist = Artist;
