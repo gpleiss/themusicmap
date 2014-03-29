@@ -1,6 +1,6 @@
 $(function() {
-  var width = $(window).width();
-  var height = $(window).height();
+  var width = 1000;//$(window).width();
+  var height = 800;//$(window).height();
 
   var force = d3.layout.force()
     .charge(-120)
@@ -31,7 +31,7 @@ $(function() {
         .attr("class", "artist")
 
     newNodes.append("circle")
-        .attr("r", _radius)
+        .attr("r", function(d) { return d.radius; })
         .call(force.drag)
       .append("title")
         .text(function(d) { return d.name; });
@@ -50,8 +50,3 @@ $(function() {
     });
   });
 });
-
-var _radius = function(artist) {
-  val = Math.ceil(20 * Math.pow(artist.familiarity, 2));
-  return val;
-}

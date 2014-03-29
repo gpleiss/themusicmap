@@ -12,6 +12,9 @@
     "async": "*",
     "echojs": "*",
     "jake": "*",
+    "underscore": "latest",
+    "d3": "*",
+    "jsdom": "*",
     "underscore": "latest"
   }
 }

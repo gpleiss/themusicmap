@@ -7,13 +7,6 @@ exports.index = function(req, res){
 };
 
 exports.mapData = function(req, res) {
-  var _stripArtist = function(artist) {
-    return {
-      name: artist.name,
-      familiarity: artist.familiarity
-    };
-  }
-
   var _echonestId = function(artist) {
     return artist.echonestId;
   }
@@ -23,8 +16,7 @@ exports.mapData = function(req, res) {
     var links = [];
 
     _.each(artists, function(artist) {
-      var strippedArtist = _stripArtist(artist);
-      nodes.push(strippedArtist);
+      nodes.push(_.bind(artist.toArtistNode, artist)());
     });
 
     _.each(artists, function(artist, sourceArtistIndex) {
@@ -37,7 +29,6 @@ exports.mapData = function(req, res) {
         });
       });
     });
-
 
     res.json({nodes: nodes, links: links});
   });
