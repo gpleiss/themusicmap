@@ -1,12 +1,11 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
-
 var ArtistSchema = new Schema({
   echonestId: { type: String, index: true },
   name: String,
   familiarity: Number,
-  similar: [Artist],
+  similar: [exports.Artist],
   mapData: {
     x: Number,
     y: Number
@@ -14,18 +13,13 @@ var ArtistSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-ArtistSchema.methods._radius = function() {
-  val = Math.ceil(20 * Math.pow(this.familiarity, 2));
-  return val;
-}
-
 ArtistSchema.methods.toArtistNode = function(options) {
   options = options || {};
 
   var node = {
     id: this.echonestId,
     name: this.name,
-    radius: this._radius(),
+    radius: radiusForArtist(this),
   };
 
   if (this.mapData.x && !options.fluidMap) {
@@ -49,16 +43,18 @@ ArtistSchema.methods.updateMapData = function(artistNode, callback, errCallback)
   });
 }
 
-var Artist = mongoose.model('Artist', ArtistSchema);
+function radiusForArtist(artist) {
+  val = Math.ceil(20 * Math.pow(artist.familiarity, 2));
+  return val;
+}
 
-var _uniquenessOfEchonestId = function (value, respond) {
+function uniquenessOfEchonestId(value, respond) {
   var self = this;
-  Artist.findOne({ echonestId: value }, function (err, artist) {
+  exports.Artist.findOne({ echonestId: value }, function (err, artist) {
     if (err) { console.error(err); }
     respond(!(artist && artist.id != self.id));
   });
 }
 
-Artist.schema.path('echonestId').validate(_uniquenessOfEchonestId, 'Artist already is stored in database');
-
-exports.Artist = Artist;
+exports.Artist = mongoose.model('Artist', ArtistSchema);
+exports.Artist.schema.path('echonestId').validate(uniquenessOfEchonestId, 'Artist already is stored in database');
