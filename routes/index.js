@@ -1,12 +1,13 @@
 var Artist = require('../models/artist').Artist
   , _ = require('underscore');
 
-
 exports.index = function(req, res){
   res.render('index');
 };
 
 exports.mapData = function(req, res) {
+  var fluidMap = req.query.fluid == 'true';
+
   var _echonestId = function(artist) {
     return artist.echonestId;
   }
@@ -16,7 +17,7 @@ exports.mapData = function(req, res) {
     var links = [];
 
     _.each(artists, function(artist) {
-      nodes.push(_.bind(artist.toArtistNode, artist)());
+      nodes.push(artist.toArtistNode({fluidMap: fluidMap}));
     });
 
     _.each(artists, function(artist, sourceArtistIndex) {

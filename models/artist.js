@@ -19,14 +19,16 @@ ArtistSchema.methods._radius = function() {
   return val;
 }
 
-ArtistSchema.methods.toArtistNode = function() {
+ArtistSchema.methods.toArtistNode = function(options) {
+  options = options || {};
+
   var node = {
     id: this.echonestId,
     name: this.name,
     radius: this._radius(),
   };
 
-  if (this.mapData.x) {
+  if (this.mapData.x && !options.fluidMap) {
     node.x = this.mapData.x;
     node.y = this.mapData.y;
     node.fixed = true;

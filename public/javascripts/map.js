@@ -15,21 +15,23 @@
     this.el = d3.select(selector);
   }
 
-  Map.prototype.render = function render() {
+  Map.prototype.render = function render(options) {
+    options = options || {};
+
     this._svg = this.el.append("svg")
       .attr("width", this._width)
       .attr("height", this._height);
 
-    fetchAndDrawNodes.call(this);
+    fetchAndDrawNodes.call(this, !!options.fluidMap);
   }
 
   Map.prototype.nodes = function nodes() {
     return this._force.nodes();
   }
 
-  function fetchAndDrawNodes() {
+  function fetchAndDrawNodes(isFluidMap) {
     var self = this;
-    d3.json('/map_data.json', function(data) {
+    d3.json('/map_data.json?fluid=' + isFluidMap, function(data) {
       self._force.nodes(data.nodes);
       self._force.links(data.links);
       self._force.start();
