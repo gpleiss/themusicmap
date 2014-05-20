@@ -14,7 +14,11 @@
     "jake": "*",
     "underscore": "latest",
     "d3": "*",
-    "jsdom": "*",
-    "underscore": "latest"
+    "jsdom": "*"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-express-server": "^0.4.17"
   }
 }
