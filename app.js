@@ -3,7 +3,7 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , routes = require('./routes')
-  , config = require('./config/config')[process.env.ENV];
+  , config = require('./config/config')[process.env.ENVIRONMENT];
 
 var app = express();
 
