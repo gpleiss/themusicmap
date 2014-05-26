@@ -44,7 +44,7 @@ ArtistSchema.methods.updateMapData = function(artistNode, callback, errCallback)
 }
 
 function radiusForArtist(artist) {
-  val = Math.ceil(20 * Math.pow(artist.familiarity, 2));
+  val = Math.ceil(100 * Math.pow(artist.familiarity, 10));
   return val;
 }
 

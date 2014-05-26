@@ -1,15 +1,52 @@
-body {
+body, html {
   margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'lucida grande';
 }
 
-g.artist circle {
-  fill: #48F;
-  stroke: #333;
-  stroke-width: 2px;
+#map {
+  overflow: hidden;
+  background-color: #eaeaea;
 }
 
 line.link {
-  stroke-width: 1px;
+  stroke-width: .5px;
   stroke: #777;
+  opacity: .5;
+  z-index: 10;
+  position: relative;
 }
 
+.artist-node circle {
+  fill: #48F;
+  opacity: .75;
+  stroke: rgba(0,0,0,.45);
+  stroke-width: 1px;
+}
+
+.artist-node text {
+  display: none;
+}
+
+.artist-name {
+  list-style: none;
+  color: #333;
+  font-weight: 400;
+}
+
+.artist-node.highlight circle {
+  cursor: pointer;
+  opacity: 1;
+  fill: red !important;
+  stroke-width: 10px;
+  -webkit-transition: 0.2s;
+}
+
+.artist-node.highlight text {
+  display: block;
+  font-size: 12px;
+  fill: white;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 1px #000;
+}

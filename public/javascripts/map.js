@@ -18,9 +18,11 @@
   Map.prototype.render = function render(options) {
     options = options || {};
 
-    this._svg = this.el.append("svg")
-      .attr("width", this._width)
-      .attr("height", this._height);
+    var svg = this._svg = this.el.select("#map").append("svg")
+        .attr("width", this._width)
+        .attr("height", this._height);
+
+    var list = this._list = this.el.select("#list").append("ul");
 
     fetchAndDrawNodes.call(this, !!options.fluidMap);
   }
@@ -39,7 +41,7 @@
       var links = self._svg.selectAll("line.link")
         .data(data.links);
 
-      var nodes = self._svg.selectAll("g.artist")
+      var nodes = self._svg.selectAll("g.artist.artist-node")
         .data(data.nodes);
 
       self._force.on("tick", function() {
@@ -52,13 +54,22 @@
 
       drawNewNodes.call(self, nodes);
       drawNewLinks.call(self, links);
+      drawNewNames.call(self, names);
+
+      $(".artist").hover(function(e) {
+        var artistId = $(e.currentTarget).data("artist-id");
+        d3.selectAll(".artist[data-artist-id=\"" + artistId + "\"]").classed("highlight", true);
+      }, function() {
+        d3.selectAll(".highlight").classed("highlight", false);
+      });
     });
   }
 
   function drawNewNodes(nodes) {
     var newNodes = nodes.enter()
       .append("g")
-        .attr("class", "artist");
+        .attr("class", "artist artist-node")
+        .attr("data-artist-id", function(d) { return d.id });
 
     newNodes.append("circle")
         .attr("r", function(d) { return d.radius; })
