@@ -24,10 +24,12 @@ exports.mapData = function(req, res) {
       _.each(artist.similar, function(similarArtist) {
         var similarArtistIndex = _.indexOf(_.map(artists, _echonestId), _echonestId(similarArtist));
 
-        links.push({
-          source: sourceArtistIndex,
-          target: similarArtistIndex
-        });
+        if (similarArtistIndex !== -1) {
+          links.push({
+            source: sourceArtistIndex,
+            target: similarArtistIndex
+          });
+        }
       });
     });
 

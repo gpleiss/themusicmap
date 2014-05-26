@@ -1,8 +1,8 @@
 (function(global) {
   global.Map = function Map(selector, options) {
     options = options || {};
-    var width = options.width ? options.width : $(global).width();
-    var height = options.height ? options.height : $(global).height();
+    var width = options.width ? options.width : 800;
+    var height = options.height ? options.height : 800;
 
     this._width = width;
     this._height = height;
@@ -42,6 +42,9 @@
         .data(data.links);
 
       var nodes = self._svg.selectAll("g.artist.artist-node")
+        .data(data.nodes);
+
+      var names = self._list.selectAll("li.artist.artist-name")
         .data(data.nodes);
 
       self._force.on("tick", function() {
@@ -86,5 +89,13 @@
     var newLinks = links.enter()
       .append("line")
         .attr("class", "link");
+  }
+
+  function drawNewNames(names) {
+    var newNames = names.enter()
+      .append("li")
+        .attr("class", "artist artist-name")
+        .attr("data-artist-id", function(d) { return d.id })
+        .text(function(d) { return d.name; });
   }
 })(this);
