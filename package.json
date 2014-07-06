@@ -6,15 +6,14 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "async": "^0.9.0",
+    "echojs": "^0.1.4",
     "express": "3.4.8",
-    "mongoose": "*",
-    "jade": "*",
-    "async": "*",
-    "echojs": "*",
-    "jake": "*",
-    "underscore": "latest",
-    "d3": "*",
-    "jsdom": "*"
+    "jade": "^1.3.1",
+    "jake": "^0.7.19",
+    "jsdom": "^0.11.1",
+    "mongoose": "^3.8.12",
+    "underscore": "latest"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
