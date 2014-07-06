@@ -1,5 +1,5 @@
 var Artist = require('../models/artist').Artist
-  , _ = require('underscore');
+  , _ = require('lodash');
 
 exports.index = function(req, res){
   res.render('index');
