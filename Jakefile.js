@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var config = require('./config/config')[process.env.ENV];
+var config = require('./config/config');
 
 jake.addListener('start', function () {
   mongoose.connect(config.db);
