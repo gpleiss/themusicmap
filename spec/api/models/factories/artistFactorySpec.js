@@ -1,5 +1,5 @@
 var proxyquire = require('proxyquire'),
-    Artist = require('../../../../models/artist').Artist;
+    Artist = require('../../../../api/models/artist');
 
 var artistFactory = proxyquire('../../../../api/models/factories/artistFactory', {});
 

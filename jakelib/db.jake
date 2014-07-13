@@ -2,7 +2,7 @@ var async = require('async')
   , echojs = require('echojs');
 
 var mapConfig = require('../config/map').mapConfig
-  , Artist = require('../models/artist').Artist;
+  , Artist = require('../api/models/artist');
 
 var echo = echojs({key: process.env.ECHONEST_KEY});
 

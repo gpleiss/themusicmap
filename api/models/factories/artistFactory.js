@@ -1,4 +1,4 @@
-var Artist = require('../../../models/artist').Artist;
+var Artist = require('../../../api/models/artist');
 
 (function() {
   'use strict';

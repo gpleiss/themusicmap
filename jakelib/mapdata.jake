@@ -1,7 +1,7 @@
 var async = require('async')
   , jsdom = require('jsdom');
 
-var Artist = require('../models/artist').Artist;
+var Artist = require('../api/models/artist');
 
 
 namespace('mapdata', function() {
