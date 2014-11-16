@@ -9,6 +9,7 @@ var config = {
 
 if (process.env.NODE_ENV == 'development') {
   config = _.extend(config, {
+    port: 3000,
     db: "mongodb://localhost/themusicmap",
   });
 }

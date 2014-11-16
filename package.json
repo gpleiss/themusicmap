@@ -17,9 +17,7 @@
     "restler": "^3.2.2"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-express-server": "^0.4.17",
-    "proxyquire": "^1.0.1"
+    "gulp": "^3.8.10",
+    "gulp-util": "^3.0.1"
   }
 }
