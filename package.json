@@ -20,9 +20,7 @@
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-exec": "^0.4.5",
     "grunt-express-server": "^0.4.17",
-    "jasmine": "https://github.com/pivotal/jasmine-npm/archive/master.tar.gz",
     "proxyquire": "^1.0.1"
   }
 }
