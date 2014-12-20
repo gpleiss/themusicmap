@@ -36,15 +36,14 @@ var mongoose = require('mongoose')
     return node;
   };
 
-  ArtistSchema.methods.updateMapData = function(artistNode, callback, errCallback) {
+  ArtistSchema.methods.updateMapData = function(artistNode, callback) {
     this.mapData = {
       x: artistNode.x,
       y: artistNode.y
     }
     this.save(function(err) {
-      if (err && errCallback) { errCallback(); }
-      else if (err) { console.error(err); }
-      callback();
+      if (err) { callback(err); }
+      callback(null, true);
     });
   };
 
