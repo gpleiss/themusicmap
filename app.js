@@ -2,7 +2,7 @@ var express = require('express')
 var http = require('http');
 var path = require('path');
 
-var routes = require('./routes');
+var routes = require('./api/routes');
 
 var app = express();
 
@@ -23,7 +23,10 @@ app.configure('development', function() {
   app.use(express.errorHandler());
 });
 
-app.get('/', routes.index);
-app.get('/map_data.json', routes.mapData);
+app.get('/artists.json', routes.artists.index);
+
+app.get('/', function(req, res) {
+  res.render('index');
+});
 
 module.exports = app;

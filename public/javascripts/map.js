@@ -33,19 +33,45 @@
 
   function fetchAndDrawNodes(isFluidMap) {
     var self = this;
-    d3.json('/map_data.json?fluid=' + isFluidMap, function(data) {
-      self._force.nodes(data.nodes);
-      self._force.links(data.links);
+    d3.json('/artists.json?fluid=' + isFluidMap, function(data) {
+      var linkData = [];
+
+      var nodeData = _.map(data.artists, function(artist) {
+        return {
+          id: artist.echonestId,
+          name: artist.name,
+          radius: Math.ceil(100 * Math.pow(artist.familiarity, 10)),
+          x: artist.mapData ? artist.mapData.x : null,
+          y: artist.mapData ? artist.mapData.y : null,
+          fixed: (artist.mapData && artist.mapData.x),
+        };
+      });
+
+      _.each(data.artists, function(artist, sourceArtistIndex) {
+        _.each(artist.similar, function(similarArtist) {
+          var similarArtistIndex = _.indexOf(_.map(data.artists, _.createCallback('echonestId')), similarArtist.echonestId);
+
+          if (similarArtistIndex !== -1) {
+            linkData.push({
+              source: sourceArtistIndex,
+              target: similarArtistIndex
+            });
+          }
+        });
+      });
+
+      self._force.nodes(nodeData);
+      self._force.links(linkData);
       self._force.start();
 
       var links = self._svg.selectAll("line.link")
-        .data(data.links);
+        .data(linkData);
 
       var nodes = self._svg.selectAll("g.artist.artist-node")
-        .data(data.nodes);
+        .data(nodeData);
 
       var names = self._list.selectAll("li.artist.artist-name")
-        .data(data.nodes);
+        .data(nodeData);
 
       self._force.on("tick", function() {
         nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
