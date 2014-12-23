@@ -2,11 +2,14 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/application.css')
-    script(src='/javascripts/vendor/jquery-1.11.0.min.js')
-    script(src='/javascripts/vendor/d3.v3.min.js')
-    script(src='/javascripts/vendor/lodash.js')
-    script(src='/javascripts/map.js')
-    script(src='/javascripts/application.js')
+    link(rel='stylesheet', href='/application.css')
+    script.
+      window.config = {};
+      window.config.musicMap = {
+        endpoint: '#{musicMapConfig.endpoint}',
+        host: '#{musicMapConfig.host}',
+      };
+      window.config.fooBar = 'bar';
+    script(src='/application.js')
   body
     block content

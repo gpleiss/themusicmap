@@ -1,13 +1,15 @@
 'use strict';
 
 var _ = require('lodash');
+var browserify = require('browserify');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var jsdom = require('jsdom');
 var mongoose = require('mongoose');
 var q = require('q');
+var source = require('vinyl-source-stream');
 
-var app = require('./app');
+var app = require('./index');
 var config = require('./config/config');
 var db = process.env.MONGOLAB_URI || config.db;
 var port = process.env.PORT || config.port;
@@ -18,8 +20,11 @@ var echonestService = require('./api/services/echonestService');
 q.longStackSupport = true;
 
 gulp.task('default', [
+  '_scripts',
   'serve',
-]);
+], function() {
+  gulp.watch('assets/js/**/*.js', ['_scripts']);
+});
 
 gulp.task('serve', function() {
   return connectToDb()
@@ -36,6 +41,14 @@ gulp.task('serve', function() {
   .fail(function(err) {
     throw err;
   });
+});
+
+gulp.task('_scripts', function() {
+  var b = browserify('./assets/js/application.js');
+
+  return b.bundle()
+    .pipe(source('./application.js'))
+    .pipe(gulp.dest('build/'))
 });
 
 gulp.task('dropDb', function() {
@@ -87,22 +100,18 @@ gulp.task('seedArtists', function() {
 });
 
 gulp.task('renderMap', function() {
-  var scripts = [
-    'http://localhost:3000/javascripts/vendor/jquery-1.11.0.min.js',
-    'http://localhost:3000/javascripts/vendor/d3.v3.min.js',
-    'http://localhost:3000/javascripts/map.js'
-  ];
+  var Map = require('./assets/js/map');
 
   return connectToDb()
 
   .then(function() {
-    return q.ninvoke(jsdom, 'env', 'http://localhost:3000/', scripts);
+    return q.ninvoke(jsdom, 'env', 'http://localhost:3000/');
   })
 
   .then(function(window) {
     gutil.log('Rendering map...');
 
-    var map = new window.Map('#map', {width: 800, height: 600});
+    var map = new Map('#map', {width: 800, height: 600});
     map.render({fliudMap: true});
     return q(map).delay(10000);
   })
