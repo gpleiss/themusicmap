@@ -18,24 +18,6 @@ var ArtistSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-ArtistSchema.methods.toArtistNode = function(options) {
-  options = options || {};
-
-  var node = {
-    id: this.echonestId,
-    name: this.name,
-    radius: radiusForArtist(this),
-  };
-
-  if (this.mapData.x && !options.fluidMap) {
-    node.x = this.mapData.x;
-    node.y = this.mapData.y;
-    node.fixed = true;
-  }
-
-  return node;
-};
-
 ArtistSchema.methods.updateMapData = function(artistNode, callback) {
   this.mapData = {
     x: artistNode.x,

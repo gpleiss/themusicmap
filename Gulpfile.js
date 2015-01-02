@@ -7,6 +7,8 @@ var gutil = require('gulp-util');
 var jsdom = require('jsdom');
 var mongoose = require('mongoose');
 var q = require('q');
+var reactify = require('reactify');
+var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 
 var app = require('./index');
@@ -23,7 +25,7 @@ gulp.task('default', [
   '_scripts',
   'serve',
 ], function() {
-  gulp.watch('assets/js/**/*.js', ['_scripts']);
+  gulp.watch(['assets/js/**/*.js', 'assets/js/**/*.jsx'], ['_scripts']);
 });
 
 gulp.task('serve', function() {
@@ -44,10 +46,12 @@ gulp.task('serve', function() {
 });
 
 gulp.task('_scripts', function() {
-  var b = browserify('./assets/js/application.js');
+  var b = browserify('./assets/js/application.jsx');
+  b.transform(reactify);
 
   return b.bundle()
-    .pipe(source('./application.js'))
+    .pipe(source('./application.jsx'))
+    .pipe(rename('application.js'))
     .pipe(gulp.dest('build/'))
 });
 

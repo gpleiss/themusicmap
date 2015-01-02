@@ -3,6 +3,9 @@ html
   head
     title= title
     link(rel='stylesheet', href='/application.css')
+  body
+    block content
+
     script.
       window.config = {};
       window.config.musicMap = {
@@ -11,5 +14,3 @@ html
       };
       window.config.fooBar = 'bar';
     script(src='/application.js')
-  body
-    block content
