@@ -4,8 +4,12 @@ var _ = require('lodash');
 var d3 = require('d3');
 var React = require('react');
 
+var SelectedArtistActions = require('../actions/selected_artist_actions');
+var SelectedArtistStore = require('../stores/selected_artist_store');
+
 var ArtistNode = React.createClass({
   propTypes: {
+    id: React.PropTypes.string.isRequired,
     radius: React.PropTypes.number.isRequired,
     x: React.PropTypes.number,
     y: React.PropTypes.number,
@@ -19,7 +23,7 @@ var ArtistNode = React.createClass({
   },
 
   hoverCallback: function hoverCallback() {
-    return this.props.onMouseOver(this.props);
+    return SelectedArtistActions.update(this.props);
   },
 
   render: function render() {
@@ -100,6 +104,8 @@ var Map = React.createClass({
         artistLinks: self.force.links(),
       });
     });
+
+    SelectedArtistStore.listen(this._updateHighlightedArtist);
   },
 
   componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
@@ -139,12 +145,6 @@ var Map = React.createClass({
     this.force.start();
   },
 
-  onArtistNodeHover: function onArtistNodeHover(artistNode) {
-    this.setState({
-      highlightedArtist: artistNode,
-    });
-  },
-
   render: function render() {
     var nodes = _(this.state.artistNodes).map(function(node, i) {
       return (
@@ -173,6 +173,12 @@ var Map = React.createClass({
         </svg>
       </div>
     );
+  },
+
+  _updateHighlightedArtist: function onArtistNodeHover(artistNode) {
+    this.setState({
+      highlightedArtist: artistNode,
+    });
   },
 });
 
