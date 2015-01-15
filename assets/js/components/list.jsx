@@ -1,11 +1,59 @@
 'use strict';
 
-var React = require('react');
+var _ = require('lodash');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 
-var Map = React.createClass({
-  render: function() {
+var SelectedArtistActions = require('../actions/selected_artist_actions');
+var SelectedArtistStore = require('../stores/selected_artist_store');
+
+var ListArtist = React.createClass({
+  render: function render() {
+    var className = cx({
+      highlight: this.props.highlight,
+    });
+
     return (
-      <h1>Hi</h1>
-    )
-  }
+      <li className={className} onMouseOver={this._hoverCallback}>{this.props.name}</li>
+    );
+  },
+
+  _hoverCallback: function() {
+    return SelectedArtistActions.update(this.props.echonestId);
+  },
 });
+
+var List = React.createClass({
+  getInitialState: function getInitialState() {
+    return {
+      highlightedArtist: null,
+    };
+  },
+
+  componentDidMount: function componentDidUpdate() {
+    SelectedArtistStore.listen(this._updateHighlightedArtistId);
+  },
+
+  render: function render() {
+    var artists = _.map(this.props.artists, function(artist) {
+      var highlight = (artist.echonestId === this.state.highlightedArtistId);
+      return (
+        <ListArtist highlight={highlight} {...artist}></ListArtist>
+      );
+    }, this);
+
+    return (
+      <ul className='list'>
+        {artists}
+      </ul>
+    );
+  },
+
+  _updateHighlightedArtistId: function(artistId) {
+    this.setState({
+      highlightedArtistId: artistId,
+    });
+  },
+});
+
+module.exports = List;

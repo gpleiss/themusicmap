@@ -5,6 +5,7 @@ var React = require('react');
 
 var ArtistStore = require('../stores/artist_store');
 var Map = require('./map.jsx');
+var List = require('./list.jsx');
 
 var _unsubscribe = _.noop;
 
@@ -25,7 +26,10 @@ var TheMusicApp = React.createFactory(React.createClass({
 
   render: function() {
     return (
-      <Map artists={this.state.artists}></Map>
+      <div>
+        <Map artists={this.state.artists}></Map>
+        <List artists={this.state.artists}></List>
+      </div>
     );
   },
 

@@ -9,7 +9,7 @@ var SelectedArtistStore = require('../stores/selected_artist_store');
 
 var ArtistNode = React.createClass({
   propTypes: {
-    id: React.PropTypes.string.isRequired,
+    echonestId: React.PropTypes.string.isRequired,
     radius: React.PropTypes.number.isRequired,
     x: React.PropTypes.number,
     y: React.PropTypes.number,
@@ -20,10 +20,6 @@ var ArtistNode = React.createClass({
     return {
       onHover: _.noop,
     };
-  },
-
-  hoverCallback: function hoverCallback() {
-    return SelectedArtistActions.update(this.props);
   },
 
   render: function render() {
@@ -37,11 +33,15 @@ var ArtistNode = React.createClass({
     }
 
     return (
-      <g className={classes} transform={transform} onMouseOver={this.hoverCallback}>
+      <g className={classes} transform={transform} onMouseOver={this._hoverCallback}>
         <circle r={this.props.radius}></circle>
         {this.props.children}
       </g>
     );
+  },
+
+  _hoverCallback: function hoverCallback() {
+    return SelectedArtistActions.update(this.props.echonestId);
   },
 });
 
@@ -105,7 +105,7 @@ var Map = React.createClass({
       });
     });
 
-    SelectedArtistStore.listen(this._updateHighlightedArtist);
+    SelectedArtistStore.listen(this._updateHighlightedArtistId);
   },
 
   componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
@@ -113,7 +113,7 @@ var Map = React.createClass({
 
     var artistNodes = _.map(nextProps.artists, function(artist) {
       return {
-        id: artist.echonestId,
+        echonestId: artist.echonestId,
         name: artist.name,
         radius: Math.ceil(100 * Math.pow(artist.familiarity, 10)),
         x: artist.mapData ? artist.mapData.x : null,
@@ -158,9 +158,11 @@ var Map = React.createClass({
       );
     });
 
-    var highlightedArtist = this.state.highlightedArtist ? (
-      <ArtistNode className='highlight' key='node-highlighted' {...this.state.highlightedArtist}>
-        <text textAnchor='middle'>{this.state.highlightedArtist.name}</text>
+    var highlightedArtist = _.find(this.state.artistNodes, {echonestId: this.state.highlightedArtistId});
+
+    var highlightedArtistNode = highlightedArtist ? (
+      <ArtistNode className='highlight' key='node-highlighted' {...highlightedArtist}>
+        <text textAnchor='middle'>{highlightedArtist.name}</text>
       </ArtistNode>
     ) : null;
 
@@ -169,15 +171,15 @@ var Map = React.createClass({
         <svg width={this.props.width} height={this.props.height}>
           {links}
           {nodes}
-          {highlightedArtist}
+          {highlightedArtistNode}
         </svg>
       </div>
     );
   },
 
-  _updateHighlightedArtist: function onArtistNodeHover(artistNode) {
+  _updateHighlightedArtistId: function(artistId) {
     this.setState({
-      highlightedArtist: artistNode,
+      highlightedArtistId: artistId,
     });
   },
 });
