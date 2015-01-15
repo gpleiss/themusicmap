@@ -2,7 +2,8 @@
 
 var _ = require('lodash');
 var d3 = require('d3');
-var React = require('react');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 
 var SelectedArtistActions = require('../actions/selected_artist_actions');
 var SelectedArtistStore = require('../stores/selected_artist_store');
@@ -26,16 +27,15 @@ var ArtistNode = React.createClass({
     var x = this.props.x || 0;
     var y = this.props.y || 0;
     var transform = 'translate(' + x + ',' + y + ')';
-    var classes = 'artist-node';
 
-    if (this.props.className) {
-      classes += ' ' + this.props.className;
-    }
+    var classes = cx({
+      'artist-node': true,
+      highlight: this.props.highlight,
+    });
 
     return (
       <g className={classes} transform={transform} onMouseOver={this._hoverCallback}>
         <circle r={this.props.radius}></circle>
-        {this.props.children}
       </g>
     );
   },
@@ -67,6 +67,20 @@ var ArtistLink = React.createClass({
   },
 });
 
+var ArtistName = React.createClass({
+  render: function render() {
+    var x = this.props.x || 0;
+    var y = this.props.y || 0;
+    var transform = 'translate(' + x + ',' + y + ')';
+
+    return (
+      <g className='artist-name' transform={transform}>
+        <text textAnchor='middle'>{this.props.name}</text>
+      </g>
+    );
+  },
+});
+
 var Map = React.createClass({
   propTypes: {
     width: React.PropTypes.number.isRequired,
@@ -76,21 +90,19 @@ var Map = React.createClass({
 
   getDefaultProps: function getDefaultProps() {
     return {
-      width: 800,
-      height: 800,
+      width: window.innerWidth - 310,
+      height: window.innerHeight,
       artists: [],
     };
   },
-
-  force: d3.layout.force()
-    .charge(-120)
-    .linkDistance(30),
 
   getInitialState: function getInitialState() {
     return {
       artistNodes: [],
       artistLinks: [],
       highlightedArtist: null,
+      scale: 1,
+      translate: [0,0],
     };
   },
 
@@ -104,6 +116,8 @@ var Map = React.createClass({
         artistLinks: self.force.links(),
       });
     });
+
+    this.zoom(d3.select(this.getDOMNode()));
 
     SelectedArtistStore.listen(this._updateHighlightedArtistId);
   },
@@ -146,9 +160,12 @@ var Map = React.createClass({
   },
 
   render: function render() {
+    var highlightedArtist = _.find(this.state.artistNodes, {echonestId: this.state.highlightedArtistId});
+
     var nodes = _(this.state.artistNodes).map(function(node, i) {
+      var highlight = (node.echonestId === this.state.highlightedArtistId);
       return (
-        <ArtistNode key={'node'+i} {...node} onMouseOver={this.onArtistNodeHover}></ArtistNode>
+        <ArtistNode key={'node'+i} highlight={highlight} {...node}></ArtistNode>
       );
     }, this).reverse().value();
 
@@ -158,28 +175,44 @@ var Map = React.createClass({
       );
     });
 
-    var highlightedArtist = _.find(this.state.artistNodes, {echonestId: this.state.highlightedArtistId});
-
-    var highlightedArtistNode = highlightedArtist ? (
-      <ArtistNode className='highlight' key='node-highlighted' {...highlightedArtist}>
-        <text textAnchor='middle'>{highlightedArtist.name}</text>
-      </ArtistNode>
+    var highlightedArtistName = highlightedArtist ? (
+      <ArtistName {...highlightedArtist}></ArtistName>
     ) : null;
 
     return (
       <div className='map'>
         <svg width={this.props.width} height={this.props.height}>
-          {links}
-          {nodes}
-          {highlightedArtistNode}
+          <g transform={'translate(' + this.state.translate + ')scale(' + this.state.scale + ')'}>
+            {links}
+            {nodes}
+            {highlightedArtistName}
+          </g>
         </svg>
       </div>
     );
   },
 
+  force: d3.layout.force()
+    .charge(-120)
+    .linkDistance(30),
+
+  zoom: function(selection) {
+    var zoomBehavior = d3.behavior.zoom()
+      .scaleExtent([1, 8])
+      .on('zoom', this._onZoom);
+    return zoomBehavior(selection);
+  },
+
   _updateHighlightedArtistId: function(artistId) {
     this.setState({
       highlightedArtistId: artistId,
+    });
+  },
+
+  _onZoom: function() {
+    this.setState({
+      translate: d3.event.translate,
+      scale: d3.event.scale,
     });
   },
 });

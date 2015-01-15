@@ -33,12 +33,13 @@ body, html {
   -webkit-transition: 0.2s;
 }
 
-.artist-node.highlight text {
+.artist-name {
   display: block;
   font-size: 12px;
   fill: white;
   text-transform: uppercase;
   text-shadow: 1px 1px 1px #000;
+  cursor: pointer;
 }
 
 .list {

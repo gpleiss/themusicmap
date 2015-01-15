@@ -35,10 +35,10 @@ var List = React.createClass({
   },
 
   render: function render() {
-    var artists = _.map(this.props.artists, function(artist) {
+    var artists = _.map(this.props.artists, function(artist, i) {
       var highlight = (artist.echonestId === this.state.highlightedArtistId);
       return (
-        <ListArtist highlight={highlight} {...artist}></ListArtist>
+        <ListArtist key={i} highlight={highlight} {...artist}></ListArtist>
       );
     }, this);
 

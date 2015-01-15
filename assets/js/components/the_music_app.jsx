@@ -9,7 +9,7 @@ var List = require('./list.jsx');
 
 var _unsubscribe = _.noop;
 
-var TheMusicApp = React.createFactory(React.createClass({
+var TheMusicApp = React.createClass({
   getInitialState: function() {
     return {
       artists: [],
@@ -38,6 +38,6 @@ var TheMusicApp = React.createFactory(React.createClass({
       artists: ArtistStore.getAll(),
     });
   },
-}));
+});
 
 module.exports = TheMusicApp;
