@@ -14,19 +14,19 @@ var ArtistNode = React.createClass({
     radius: React.PropTypes.number.isRequired,
     x: React.PropTypes.number,
     y: React.PropTypes.number,
-    onMouseOver: React.PropTypes.func,
+    scale: React.PropTypes.number,
   },
 
   getDefaultProps: function getDefaultProps() {
     return {
-      onHover: _.noop,
+      scale: 1,
     };
   },
 
   render: function render() {
     var x = this.props.x || 0;
     var y = this.props.y || 0;
-    var transform = 'translate(' + x + ',' + y + ')';
+    var transform = 'translate(' + x + ',' + y + ')scale(' + Math.pow(this.props.scale, -0.4) + ')';
 
     var classes = cx({
       'artist-node': true,
@@ -47,20 +47,28 @@ var ArtistNode = React.createClass({
 
 var ArtistLink = React.createClass({
   propTypes: {
-    x1: React.PropTypes.number,
-    x2: React.PropTypes.number,
-    y1: React.PropTypes.number,
-    y2: React.PropTypes.number,
+    x: React.PropTypes.objectOf(React.PropTypes.number),
+    y: React.PropTypes.objectOf(React.PropTypes.number),
+    scale: React.PropTypes.number,
+  },
+
+  getDefaultProps: function getDefaultProps() {
+    return {
+      scale: 1,
+    };
   },
 
   render: function render() {
+    var strokeWidth = Math.pow(this.props.scale, -0.6);
+
     return (
       <g className="artist-link">
         <line
           x1={this.props.source.x}
           y1={this.props.source.y}
           x2={this.props.target.x}
-          y2={this.props.target.y}>
+          y2={this.props.target.y}
+          strokeWidth={strokeWidth}>
         </line>
       </g>
     );
@@ -68,10 +76,25 @@ var ArtistLink = React.createClass({
 });
 
 var ArtistName = React.createClass({
+  propTypes: {
+    name: React.PropTypes.string.isRequired,
+    x: React.PropTypes.number,
+    y: React.PropTypes.number,
+    scale: React.PropTypes.number,
+  },
+
+  getDefaultProps: function getDefaultProps() {
+    return {
+      scale: 1,
+    };
+  },
+
+  // TODO: check unmounting
+
   render: function render() {
     var x = this.props.x || 0;
     var y = this.props.y || 0;
-    var transform = 'translate(' + x + ',' + y + ')';
+    var transform = 'translate(' + x + ',' + y + ')scale(' + Math.pow(this.props.scale, -0.4) + ')';
 
     return (
       <g className='artist-name' transform={transform}>
@@ -165,18 +188,25 @@ var Map = React.createClass({
     var nodes = _(this.state.artistNodes).map(function(node, i) {
       var highlight = (node.echonestId === this.state.highlightedArtistId);
       return (
-        <ArtistNode key={'node'+i} highlight={highlight} {...node}></ArtistNode>
+        <ArtistNode key={'node'+i} 
+          highlight={highlight}
+          scale={this.state.scale}
+          {...node} />
       );
     }, this).reverse().value();
 
     var links = _.map(this.state.artistLinks, function(link, i) {
       return (
-        <ArtistLink key={'link'+i} {...link}></ArtistLink>
+        <ArtistLink key={'link'+i}
+          scale={this.state.scale}
+          {...link} />
       );
-    });
+    }, this);
 
     var highlightedArtistName = highlightedArtist ? (
-      <ArtistName {...highlightedArtist}></ArtistName>
+      <ArtistName 
+        scale={this.state.scale}
+        {...highlightedArtist} />
     ) : null;
 
     return (
