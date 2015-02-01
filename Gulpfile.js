@@ -14,7 +14,7 @@ var source = require('vinyl-source-stream');
 var app = require('./index');
 var config = require('./config/config');
 var db = process.env.MONGOLAB_URI || config.db;
-var port = process.env.PORT || config.port;
+var port = process.env.VCAP_APP_PORT || config.port;
 
 var Artist = require('./api/models/artist');
 var echonestService = require('./api/services/echonestService');
