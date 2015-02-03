@@ -27,8 +27,8 @@ var TheMusicApp = React.createClass({
   render: function() {
     return (
       <div>
-        <Map artists={this.state.artists}></Map>
-        <List artists={this.state.artists}></List>
+        <Map artists={this.state.artists} width={window.innerWidth - 310} height={window.innerHeight} />
+        <List artists={this.state.artists} />
       </div>
     );
   },

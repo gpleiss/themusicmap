@@ -3,8 +3,11 @@
 var _ = require('lodash');
 var d3 = require('d3');
 var React = require('react/addons');
+var Reflux = require('reflux');
 var cx = React.addons.classSet;
 
+var ArtistNodeActions = require('../actions/artist_node_actions');
+var ArtistNodeStore = require('../stores/artist_node_store');
 var SelectedArtistActions = require('../actions/selected_artist_actions');
 var SelectedArtistStore = require('../stores/selected_artist_store');
 
@@ -105,17 +108,17 @@ var ArtistName = React.createClass({
 });
 
 var Map = React.createClass({
+  mixins: [Reflux.ListenerMixin],
+
   propTypes: {
     width: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
-    artists: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    fluid: React.PropTypes.bool,
   },
 
   getDefaultProps: function getDefaultProps() {
     return {
-      width: window.innerWidth - 310,
-      height: window.innerHeight,
-      artists: [],
+      fluid: false,
     };
   },
 
@@ -130,65 +133,28 @@ var Map = React.createClass({
   },
 
   componentDidMount: function componentWillMount() {
-    var self = this;
+    ArtistNodeActions.init(this.props.width, this.props.height, this.props.fluid);
 
-    self.force.size([self.props.width, self.props.height]);
-    self.force.on('tick', function() {
-      self.setState({
-        artistNodes: self.force.nodes(),
-        artistLinks: self.force.links(),
-      });
-    });
+    this.listenTo(SelectedArtistStore, this._updateHighlightedArtistId);
+    this.listenTo(ArtistNodeStore, this._update);
 
     this.zoom(d3.select(this.getDOMNode()));
-
-    SelectedArtistStore.listen(this._updateHighlightedArtistId);
   },
 
-  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-    var echonestIds = _.map(nextProps.artists, _.createCallback('echonestId'));
-
-    var artistNodes = _.map(nextProps.artists, function(artist) {
-      return {
-        echonestId: artist.echonestId,
-        name: artist.name,
-        radius: Math.ceil(100 * Math.pow(artist.familiarity, 10)),
-        x: artist.mapData ? artist.mapData.x : null,
-        y: artist.mapData ? artist.mapData.y : null,
-        fixed: (artist.mapData && artist.mapData.x),
-      };
-    });
-
-    var artistLinks = _(nextProps.artists).map(function(artist, sourceArtistIndex) {
-      return _.map(artist.similar, function(similarArtist) {
-        var similarArtistIndex = _.indexOf(echonestIds, similarArtist.echonestId);
-        if (similarArtistIndex !== -1) {
-          return {
-            source: sourceArtistIndex,
-            target: similarArtistIndex,
-          };
-        }
-      });
-    }).flatten().compact().value();
-
+  _update: function(artistNodes, artistLinks) {
     this.setState({
       artistLinks: artistLinks,
       artistNodes: artistNodes,
     });
-
-    this.force.stop();
-    this.force.nodes(artistNodes);
-    this.force.links(artistLinks);
-    this.force.start();
   },
 
   render: function render() {
     var highlightedArtist = _.find(this.state.artistNodes, {echonestId: this.state.highlightedArtistId});
 
-    var nodes = _(this.state.artistNodes).map(function(node, i) {
+    var nodes = _(this.state.artistNodes).map(function(node) {
       var highlight = (node.echonestId === this.state.highlightedArtistId);
       return (
-        <ArtistNode key={'node'+i} 
+        <ArtistNode key={node.echonestId} 
           highlight={highlight}
           scale={this.state.scale}
           {...node} />
@@ -221,10 +187,6 @@ var Map = React.createClass({
       </div>
     );
   },
-
-  force: d3.layout.force()
-    .charge(-120)
-    .linkDistance(30),
 
   zoom: function(selection) {
     var zoomBehavior = d3.behavior.zoom()
