@@ -149,12 +149,7 @@ gulp.task('renderMap', function() {
   .then(disconnectFromDb)
 
   .fail(function(err) {
-    if (err.message.match(/ECONNREFUSED/)) {
-      gutil.log('Failed. Is node server started?');
-      process.exit(1);
-    } else {
-      throw err;
-    }
+    throw err;
   });
 });
 
