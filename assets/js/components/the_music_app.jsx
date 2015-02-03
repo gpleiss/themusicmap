@@ -2,14 +2,15 @@
 
 var _ = require('lodash');
 var React = require('react');
+var Reflux = require('reflux');
 
 var ArtistStore = require('../stores/artist_store');
 var Map = require('./map.jsx');
 var List = require('./list.jsx');
 
-var _unsubscribe = _.noop;
-
 var TheMusicApp = React.createClass({
+  mixins: [Reflux.ListenerMixin],
+
   getInitialState: function() {
     return {
       artists: [],
@@ -17,11 +18,7 @@ var TheMusicApp = React.createClass({
   },
 
   componentDidMount: function() {
-    _unsubscribe = ArtistStore.listen(this._onChange);
-  },
-
-  componentDidUnmount: function() {
-    _unsubscribe();
+    this.listenTo(ArtistStore, this._onChange);
   },
 
   render: function() {

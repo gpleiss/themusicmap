@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var React = require('react/addons');
+var Reflux = require('reflux');
 var cx = React.addons.classSet;
 
 var SelectedArtistActions = require('../actions/selected_artist_actions');
@@ -24,6 +25,8 @@ var ListArtist = React.createClass({
 });
 
 var List = React.createClass({
+  mixins: [Reflux.ListenerMixin],
+
   getInitialState: function getInitialState() {
     return {
       highlightedArtist: null,
@@ -31,7 +34,7 @@ var List = React.createClass({
   },
 
   componentDidMount: function componentDidUpdate() {
-    SelectedArtistStore.listen(this._updateHighlightedArtistId);
+    this.listenTo(SelectedArtistStore, this._updateHighlightedArtistId);
   },
 
   render: function render() {
