@@ -1,5 +1,7 @@
 'use strict';
 
+require("node-jsx").install({ extension: ".jsx" });
+
 var _ = require('lodash');
 var browserify = require('browserify');
 var gulp = require('gulp');
@@ -104,24 +106,42 @@ gulp.task('seedArtists', function() {
 });
 
 gulp.task('renderMap', function() {
-  var Map = require('./assets/js/map');
 
   return connectToDb()
 
   .then(function() {
-    return q.ninvoke(jsdom, 'env', 'http://localhost:3000/');
+    return q.ninvoke(jsdom, 'env', '<div id="content"></div>');
   })
 
   .then(function(window) {
     gutil.log('Rendering map...');
 
-    var map = new Map('#map', {width: 800, height: 600});
-    map.render({fliudMap: true});
-    return q(map).delay(10000);
+    global.window = window;
+    global.document = window.document;
+    global.navigator = {userAgent: []};
+    global.config = config;
+
+    var React = require('react/addons');
+    var ArtistActions = require('./assets/js/actions/artist_actions.js');
+    var Map = require('./assets/js/components/map.jsx');
+
+    ArtistActions.fetch();
+
+    var node = window.document.getElementById('content');
+
+    var element = React.createElement(Map, {
+      width: 1000,
+      height: 1000,
+      fluid: true,
+    });
+
+    React.render(element, node);
+    return q.delay(60000);
   })
 
-  .then(function(map) {
-    return q.all(_.map(map.nodes(), function(node, callback) {
+  .then(function() {
+    var ArtistNodeStore = require('./assets/js/stores/artist_node_store.js');
+    return q.all(_.map(ArtistNodeStore.getNodes(), function(node, callback) {
       return updateMapDataForArtistFrom(node);
     }));
   })
@@ -171,7 +191,7 @@ function addSimilarArtistsFor(artist, delay) {
 }
 
 function updateMapDataForArtistFrom(node) {
-  return q.ninvoke(Artist, 'findOne', {echonestId: node.id})
+  return q.ninvoke(Artist, 'findOne', {echonestId: node.echonestId})
 
   .then(function(artist) {
     return q.ninvoke(artist, 'updateMapData', node);
